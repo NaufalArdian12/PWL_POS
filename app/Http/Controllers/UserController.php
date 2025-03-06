@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index () {
+    public function index()
+    {
 
         // $data= [
         //     'username' => 'Manager_tiga',
@@ -40,7 +41,19 @@ class UserController extends Controller
         // dd($user);
         // return view('user', ['data' => $user]);
 
-        $user = Usermodel::where('level_id', 1)->count();
+        // $user = Usermodel::where('level_id', 1)->count();
+        // return view('user', ['data' => $user]);
+
+        $user = Usermodel::firstOrNew(
+            [
+                'username' => 'manager33',
+                'nama' => 'Manager Tiga Tiga',
+                'password' => Hash::make('12345'),
+                'level_id' => 2
+            ],
+        );
+        $user->save();
+        
         return view('user', ['data' => $user]);
     }
 }
