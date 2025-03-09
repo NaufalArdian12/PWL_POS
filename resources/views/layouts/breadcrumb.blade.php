@@ -10,6 +10,6 @@
                     <li class="breadcrumb-item active">Blank Page</li>
                 </ol>
             </div>
-        </div>
+        </div> 
     </div><!-- /.container-fluid -->
 </section>
