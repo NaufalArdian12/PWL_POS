@@ -17,7 +17,7 @@ class LevelController extends Controller
         // $row = DB::delete ('delete from m_levels where level_kode = ?', ['CUS']);
         // return 'Delete data berhasil, Jumlah data yang dihapus adalah ' . $row . ' baris';
 
-        $data = DB::select('select * from m_levels');
+        $data = DB::select('select * from m_level');
         return view('level', ['data' => $data]);
     }
 }
