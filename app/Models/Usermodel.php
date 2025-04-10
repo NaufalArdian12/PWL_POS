@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class UserModel extends Model
 {
     use HasFactory;
-    protected $table = 'm_user';
+    protected $table = 'm_users';
     protected $primaryKey = 'user_id';
 
     protected $fillable = [
@@ -23,7 +23,7 @@ class UserModel extends Model
     {
         return $this->belongsTo(LevelModel::class, 'level_id', 'level_id');
     }
-    
+
 
 
 }
