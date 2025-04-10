@@ -59,7 +59,7 @@ class LevelController extends Controller
     {
         // Validasi input
         $request->validate([
-            'level_kode' => 'required|string|max:10|unique:m_level,level_kode',
+            'level_kode' => 'required|string|max:10|unique:m_levels,level_kode',
             'level_nama' => 'required|string|max:100',
         ]);
 
@@ -120,7 +120,7 @@ class LevelController extends Controller
     {
         // Validasi input
         $request->validate([
-            'level_kode' => 'required|string|max:10|unique:m_level,level_kode,' . $id . ',level_id',
+            'level_kode' => 'required|string|max:10|unique:m_levels,level_kode,' . $id . ',level_id',
             'level_nama' => 'required|string|max:100',
         ]);
 
