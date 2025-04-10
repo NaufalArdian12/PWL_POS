@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LevelModel extends Model
 {
-    protected $table = 'm_level';
+    protected $table = 'm_levels';
     protected $primaryKey = 'level_id';
 
     protected $fillable = [
