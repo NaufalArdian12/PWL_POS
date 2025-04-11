@@ -98,7 +98,10 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Terjadi Kesalahan',
-                                    text: response.message
+                                    text: response.message,
+                                    position: 'center',
+                                    showConfirmButton: false,
+                                    timer: 1500
                                 });
                             }
                         }
