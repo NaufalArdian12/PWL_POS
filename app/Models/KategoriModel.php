@@ -12,7 +12,7 @@ class KategoriModel extends Model
 
     protected $fillable = [
         'kategori_kode',
-        'kategori_nama',
+        'kategori_name',
     ];
 
     public function barang()
