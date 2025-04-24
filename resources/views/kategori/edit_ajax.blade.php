@@ -22,19 +22,20 @@
         <div id="modal-master" class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit Data Kategori</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Data kategori</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Kode Kategori</label>
+                        <label>Kode kategori</label>
                         <input value="{{ $kategori->kategori_kode }}" type="text" name="kategori_kode" id="kategori_kode"
                             class="form-control" required>
                         <small id="error-kategori_kode" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
-                        <label>Nama Kategori</label>
+                        <label>Nama kategori</label>
+
                         <input value="{{ $kategori->kategori_name }}" type="text" name="kategori_name" id="kategori_name"
                             class="form-control" required>
                         <small id="error-kategori_name" class="error-text form-text text-danger"></small>
@@ -78,7 +79,7 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 });
-                                dataKategori.ajax.reload();
+                                datakategori.ajax.reload();
                             } else {
                                 $('.error-text').text('');
                                 $.each(response.msgField, function (prefix, val) {

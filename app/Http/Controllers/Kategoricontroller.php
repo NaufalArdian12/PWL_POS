@@ -146,7 +146,7 @@ class KategoriController extends Controller
     {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'kategori_kode' => 'required|string|min:3|unique:m_kategori,kategori_kode',
+                'kategori_kode' => 'required|string|min:3|unique:m_kategoris,kategori_kode',
                 'kategori_name' => 'required|string|max:100',
             ];
             $validator = Validator::make($request->all(), $rules);
@@ -179,7 +179,7 @@ class KategoriController extends Controller
     {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'kategori_kode' => 'required|string|min:3|unique:m_kategori,kategori_kode,' . $id . ',kategori_id',
+                'kategori_kode' => 'required|string|min:3|unique:m_kategoris,kategori_kode,' . $id . ',kategori_id',
                 'kategori_name' => 'required|string|max:100',
             ];
             $validator = Validator::make($request->all(), $rules);
