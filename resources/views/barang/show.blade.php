@@ -19,7 +19,7 @@
             </tr>
             <tr>
                 <th>Kategori</th>
-                <td>{{ $barang->kategori->kategori_nama }}</td>
+                <td>{{ $barang->kategori->kategori_name }}</td>
             </tr>
             <tr>
                 <th>Kode Barang</th>

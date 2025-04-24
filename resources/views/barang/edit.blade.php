@@ -21,7 +21,7 @@
                     <select class="form-control" id="kategori_id" name="kategori_id" required>
                         <option value="">- Pilih Kategori -</option>
                         @foreach($kategori as $item)
-                        <option value="{{ $item->kategori_id }}" @if($item->kategori_id == $barang->kategori_id) selected @endif>{{ $item->kategori_nama }}</option>
+                        <option value="{{ $item->kategori_id }}" @if($item->kategori_id == $barang->kategori_id) selected @endif>{{ $item->kategori_name }}</option>
                         @endforeach
                     </select>
                     @error('kategori_id')

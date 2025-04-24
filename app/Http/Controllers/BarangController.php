@@ -7,6 +7,9 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Models\KategoriModel;
 use App\Models\BarangModel;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory; // Ensure this line is present and correctly imported
+use PhpOffice\PhpSpreadsheet\Spreadsheet as Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class BarangController extends Controller
 {
@@ -30,25 +33,22 @@ class BarangController extends Controller
 
     public function list(Request $request)
     {
-        $barangs = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'kategori_id', 'harga_beli', 'harga_jual')->with('kategori');
+        $barangs = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'kategori_id', 'harga_beli', 'harga_jual', 'stok')->with('kategori');
 
-        if($request->kategori_id){
+        if ($request->kategori_id) {
             $barangs->where('kategori_id', $request->kategori_id);
         }
 
         return DataTables::of($barangs)
             ->addIndexColumn()
             ->addColumn('aksi', function ($barang) {
-                // $btn = '<a href="' . url('/barang/' . $barang->barang_id) . '" class="btn btn-info btn-sm">Detail</a> ';
-                // $btn .= '<a href="' . url('/barang/' . $barang->barang_id . '/edit') . '" class="btn btn-warning btn-sm">Edit</a> ';
-                // $btn .= '<form class="d-inline-block" method="POST" action="' .
-                //     url('/barang/' . $barang->barang_id) . '">'
-                //     . csrf_field() . method_field('DELETE') .
-                //     '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button></form>';
                 $btn = '<button onclick="modalAction(\'' . url('/barang/' . $barang->barang_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/barang/' . $barang->barang_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/barang/' . $barang->barang_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
+            })
+            ->editColumn('kategori', function ($barang) {
+                return $barang->kategori->kategori_name;
             })
             ->rawColumns(['aksi'])
             ->make(true);
@@ -79,6 +79,7 @@ class BarangController extends Controller
             'barang_nama' => 'required',
             'harga_beli' => 'required',
             'harga_jual' => 'required',
+            'stok' => 'required|integer|min:0', // tambahkan validasi stok
         ]);
         BarangModel::create([
             'kategori_id' => $request->kategori_id,
@@ -86,13 +87,14 @@ class BarangController extends Controller
             'barang_nama' => $request->barang_nama,
             'harga_beli' => $request->harga_beli,
             'harga_jual' => $request->harga_jual,
+            'stok' => $request->stok, // tambahkan kolom stok
         ]);
         return redirect('/barang')->with('success', 'Data barang berhasil disimpan');
     }
 
     public function show(String $id)
     {
-        $barang = BarangModel::with('kategori')->find($id);
+        $barang = BarangModel::with('kategori', 'stok.supplier', 'stoks')->find($id);
         $breadcrumb = (object) [
             'title' => 'Detail Barang',
             'list' => ['Home', 'Barang', 'Detail']
@@ -129,6 +131,7 @@ class BarangController extends Controller
             'barang_nama' => 'required',
             'harga_beli' => 'required',
             'harga_jual' => 'required',
+            'stok' => 'required|integer|min:0', // tambahkan validasi stok
         ]);
 
         BarangModel::find($id)->update([
@@ -137,6 +140,7 @@ class BarangController extends Controller
             'barang_nama' => $request->barang_nama,
             'harga_beli' => $request->harga_beli,
             'harga_jual' => $request->harga_jual,
+            'stok' => $request->stok, // tambahkan kolom stok
         ]);
         return redirect('/barang')->with('success', 'Data barang berhasil diubah');
     }
@@ -157,7 +161,7 @@ class BarangController extends Controller
 
     public function create_ajax()
     {
-        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
+        $kategori = KategoriModel::select('kategori_id', 'kategori_name')->get();
         return view('barang.create_ajax', compact('kategori'));
     }
 
@@ -166,10 +170,11 @@ class BarangController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'kategori_id' => 'required|integer',
-                'barang_kode' => 'required|string|min:3|unique:m_barang,barang_kode',
+                'barang_kode' => 'required|string|min:3|unique:m_barangs,barang_kode',
                 'barang_nama' => 'required|string|max:100',
                 'harga_beli' => 'required|numeric',
-                'harga_jual' => 'required|numeric'
+                'harga_jual' => 'required|numeric',
+                'stok' => 'required|integer|min:0' // tambahkan validasi stok
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -188,31 +193,16 @@ class BarangController extends Controller
         return redirect('/');
     }
 
-    public function show_ajax(String $id)
-    {
-        $barang = BarangModel::find($id);
-        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
-
-        return view('barang.show_ajax', compact('barang', 'kategori'));
-    }
-
-    public function edit_ajax(String $id)
-    {
-        $barang = BarangModel::find($id);
-        $kategori = KategoriModel::select('kategori_id', 'kategori_nama')->get();
-
-        return view('barang.edit_ajax', compact('barang', 'kategori'));
-    }
-
     public function update_ajax(Request $request, $id)
     {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'kategori_id' => 'required|integer',
-                'barang_kode' => 'required|string|min:3|unique:m_barang,barang_kode,' . $id . ',barang_id',
+                'barang_kode' => 'required|string|min:3|unique:m_barangs,barang_kode,' . $id . ',barang_id',
                 'barang_nama' => 'required|string|max:100',
                 'harga_beli' => 'required|numeric',
-                'harga_jual' => 'required|numeric'
+                'harga_jual' => 'required|numeric',
+                'stok' => 'required|integer|min:0' // tambahkan validasi stok
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
@@ -238,6 +228,23 @@ class BarangController extends Controller
         }
         return redirect('/barang');
     }
+
+    public function show_ajax(String $id)
+    {
+        $barang = BarangModel::with('kategori')->find($id);
+        $kategori = KategoriModel::select('kategori_id', 'kategori_name')->get();
+
+        return view('barang.show_ajax', compact('barang', 'kategori'));
+    }
+
+    public function edit_ajax(String $id)
+    {
+        $barang = BarangModel::find($id);
+        $kategori = KategoriModel::select('kategori_id', 'kategori_name')->get();
+
+        return view('barang.edit_ajax', compact('barang', 'kategori'));
+    }
+
 
     public function confirm_ajax(string $id)
     {
@@ -271,5 +278,113 @@ class BarangController extends Controller
             }
         }
         return redirect('/barang');
+    }
+
+    public function import()
+    {
+        return view('barang.import');
+    }
+
+    public function import_ajax(Request $request)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'file_barang' => ['required', 'mimes:xlsx', 'max:1024']
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+            $file = $request->file('file_barang');
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray(null, false, true, true);
+            $insert = [];
+            if (count($data) > 1) {
+                foreach ($data as $baris => $value) {
+                    if ($baris > 1) {
+                        $insert[] = [
+                            'kategori_id' => $value['A'],
+                            'barang_kode' => $value['B'],
+                            'barang_nama' => $value['C'],
+                            'harga_beli' => $value['D'],
+                            'harga_jual' => $value['E'],
+                            'stok' => $value['F'] ?? 0, // tambahkan kolom stok, default 0 jika tidak ada
+                            'created_at' => now(),
+                        ];
+                    }
+                }
+                if (count($insert) > 0) {
+                    BarangModel::insertOrIgnore($insert);
+                }
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data berhasil diimport'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tidak ada data yang diimport'
+                ]);
+            }
+        }
+        return redirect('/');
+    }
+
+    public function export_excel()
+    {
+        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'stok')
+            ->orderBy('kategori_id')->with('kategori')->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Barang');
+        $sheet->setCellValue('C1', 'Nama Barang');
+        $sheet->setCellValue('D1', 'Harga Beli');
+        $sheet->setCellValue('E1', 'Harga Jual');
+        $sheet->setCellValue('F1', 'Stok'); // tambahkan header stok
+        $sheet->setCellValue('G1', 'Kategori ID'); // pindah ke kolom G
+
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+        $no = 1;
+        $baris = 2;
+        foreach ($barang as $key => $value) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $value->barang_kode);
+            $sheet->setCellValue('C' . $baris, $value->barang_nama);
+            $sheet->setCellValue('D' . $baris, $value->harga_beli);
+            $sheet->setCellValue('E' . $baris, $value->harga_jual);
+            $sheet->setCellValue('F' . $baris, $value->stok); // tambahkan nilai stok
+            $sheet->setCellValue('G' . $baris, $value->kategori->kategori_id); // pindah ke kolom G
+            $baris++;
+            $no++;
+        }
+
+        foreach (range('A', 'G') as $columnID) { // update range kolom
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $sheet->setTitle('Data Barang');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Barang ' . date('Y-m-d H:i:s') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d MY H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+        $writer->save('php://output');
+        exit;
     }
 }

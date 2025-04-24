@@ -13,10 +13,9 @@
                     <select name="kategori_id" id="kategori_id" class="form-control" required>
                         <option value="">- Pilih Kategori -</option>
                         @foreach($kategori as $k)
-                            <option value="{{ $k->kategori_id }}">{{ $k->kategori_nama }}</option>
+                            <option value="{{ $k->kategori_id }}">{{ $k->kategori_name }}</option>
                         @endforeach
                     </select>
-                    <small id="error-kategori_id" class="error-text form-text text-danger"></small>
                 </div>
                 <div class="form-group">
                     <label>Kode Barang</label>
@@ -37,6 +36,11 @@
                     <label>Harga Jual</label>
                     <input value="" type="number" name="harga_jual" id="harga_jual" class="form-control" required>
                     <small id="error-harga_jual" class="error-text form-text text-danger"></small>
+                </div>
+                <div class="form-group">
+                    <label>Stok</label>
+                    <input value="" type="number" name="stok" id="stok" class="form-control" required>
+                    <small id="error-stok" class="error-text form-text text-danger"></small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -84,10 +88,7 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil',
-                                text: response.message,
-                                position: 'center',
-                                showConfirmButton: false,
-                                timer: 1500
+                                text: response.message
                             });
                             dataBarang.ajax.reload();
                         } else {
@@ -98,10 +99,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Terjadi Kesalahan',
-                                text: response.message,
-                                position: 'center',
-                                showConfirmButton: false,
-                                timer: 1500
+                                text: response.message
                             });
                         }
                     }
