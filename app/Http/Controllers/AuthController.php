@@ -68,7 +68,7 @@ class AuthController extends Controller
                     'username' => $request->username,
                     'nama' => $request->nama,
                     'password' => bcrypt($request->password),
-                    'level_id' => 4,
+                    'level_id' => 3,
                 ]);
 
                 return response()->json([
