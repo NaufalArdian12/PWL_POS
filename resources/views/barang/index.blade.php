@@ -6,6 +6,7 @@
         <div class="card-tools">
             <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-sm btn-info mt-1">Import Barang</button>
             <a class="btn btn-sm btn-primary mt-1" href="{{ url('level/export_excel') }}">Export</a>
+            <a href="{{ url('/barang/export_pdf') }}" class="btn btn-warning">Export Barang (PDF)</a>
             <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
@@ -46,7 +47,6 @@
                     <th>Harga Beli</th>
                     <th>Harga Jual</th>
                     <th>Kategori</th>
-                    <th>stok</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -116,12 +116,6 @@
                 },
                 {
                     data: "kategori_id",
-                    className: "",
-                    orderable: true,
-                    searchable: false
-                },
-                {
-                    data: "stok",
                     className: "",
                     orderable: true,
                     searchable: false
