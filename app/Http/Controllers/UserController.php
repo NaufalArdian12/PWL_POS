@@ -96,7 +96,7 @@ class UserController extends Controller
         return redirect('/user')->with('success', 'Data user berhasil disimpan');
     }
 
-    public function show(String $id)
+    public function show(string $id)
     {
         $user = UserModel::with('level')->find($id);
         $breadcrumb = (object) [
@@ -110,7 +110,7 @@ class UserController extends Controller
         return view('user.show', compact('breadcrumb', 'page', 'user', 'activeMenu'));
     }
 
-    public function edit(String $id)
+    public function edit(string $id)
     {
         $user = UserModel::find($id);
         $level = LevelModel::all();
@@ -202,7 +202,7 @@ class UserController extends Controller
         return redirect('/');
     }
 
-    public function show_ajax(String $id)
+    public function show_ajax(string $id)
     {
         $user = UserModel::find($id);
         $level = LevelModel::select('level_id', 'level_nama')->get();
@@ -210,12 +210,12 @@ class UserController extends Controller
         return view('user.show_ajax', compact('user', 'level'));
     }
 
-    public function edit_ajax(String $id)
+    public function edit_ajax(string $id)
     {
         $user = UserModel::find($id);
         $level = LevelModel::select('level_id', 'level_nama')->get();
 
-        return view('user.edit_ajax',['user' => $user, 'level' => $level]);
+        return view('user.edit_ajax', ['user' => $user, 'level' => $level]);
     }
 
     public function update_ajax(Request $request, $id)
@@ -255,11 +255,11 @@ class UserController extends Controller
         }
         return redirect('/');
     }
-    public function confirm_ajax(String $id)
+    public function confirm_ajax(string $id)
     {
         $user = UserModel::find($id);
 
-        return view('user.confirm_ajax', ['user'=> $user]);
+        return view('user.confirm_ajax', ['user' => $user]);
     }
 
     public function delete_ajax(Request $request, $id)
@@ -287,5 +287,53 @@ class UserController extends Controller
             }
         }
         return redirect('/user');
+    }
+    public function profile()
+    {
+        $user = auth()->user();
+        $breadcrumb = (object) [
+            'title' => 'Profile',
+            'list' => ['Home', 'Profile']
+        ];
+
+        $page = (object) [
+            'title' => 'User Profile'
+        ];
+
+        $activeMenu = 'profile';
+        return view('profile', compact('breadcrumb', 'page', 'user', 'activeMenu'));
+    }
+
+    public function updateProfilePicture(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $authUser = auth()->user();
+        $user = UserModel::find($authUser->user_id);
+
+        if ($user->image && file_exists(public_path($user->image))) {
+            unlink(public_path($user->image));
+        }
+
+        $file = $request->file('image');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = 'uploads/profile/';
+
+        if (!file_exists(public_path($filePath))) {
+            mkdir(public_path($filePath), 0777, true);
+        }
+
+        $file->move(public_path($filePath), $fileName);
+
+        $user->image = $filePath . $fileName;
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile picture updated successfully',
+            'image_url' => $user->getProfilePictureUrl()
+        ]);
     }
 }
