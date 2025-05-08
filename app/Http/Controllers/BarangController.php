@@ -9,7 +9,7 @@ use App\Models\BarangModel;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory; // Ensure this line is present and correctly imported
 use PhpOffice\PhpSpreadsheet\Spreadsheet as Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Barryvdh\DomPDF\Facade\Pdf; // Add this line to import the Pdf class
 
 class BarangController extends Controller
 {
@@ -92,7 +92,7 @@ class BarangController extends Controller
         return redirect('/barang')->with('success', 'Data barang berhasil disimpan');
     }
 
-    public function show(String $id)
+    public function show(string $id)
     {
         $barang = BarangModel::with('kategori', 'stok.supplier', 'stoks')->find($id);
         $breadcrumb = (object) [
@@ -106,7 +106,7 @@ class BarangController extends Controller
         return view('barang.show', compact('breadcrumb', 'page', 'barang', 'activeMenu'));
     }
 
-    public function edit(String $id)
+    public function edit(string $id)
     {
         $barang = BarangModel::find($id);
         $kategori = KategoriModel::all();
@@ -145,7 +145,7 @@ class BarangController extends Controller
         return redirect('/barang')->with('success', 'Data barang berhasil diubah');
     }
 
-    public function destroy(String $id)
+    public function destroy(string $id)
     {
         $check = BarangModel::find($id);
         if (!$check) {
@@ -229,7 +229,7 @@ class BarangController extends Controller
         return redirect('/barang');
     }
 
-    public function show_ajax(String $id)
+    public function show_ajax(string $id)
     {
         $barang = BarangModel::with('kategori')->find($id);
         $kategori = KategoriModel::select('kategori_id', 'kategori_name')->get();
@@ -237,7 +237,7 @@ class BarangController extends Controller
         return view('barang.show_ajax', compact('barang', 'kategori'));
     }
 
-    public function edit_ajax(String $id)
+    public function edit_ajax(string $id)
     {
         $barang = BarangModel::find($id);
         $kategori = KategoriModel::select('kategori_id', 'kategori_name')->get();
@@ -386,5 +386,19 @@ class BarangController extends Controller
         header('Pragma: public');
         $writer->save('php://output');
         exit;
+    }
+    public function export_pdf()
+    {
+        $barang = BarangModel::select('kategori_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual')
+            ->orderBy('kategori_id')
+            ->orderBy('barang_kode')
+            ->with('kategori')
+            ->get();
+
+        $pdf = Pdf::loadView('barang.export_pdf', ['barang' => $barang]);
+        $pdf->setPaper('A4', 'potrait');
+        $pdf->setOptions(['isRemoteEnabled' => true]);
+        $pdf->render();
+        return $pdf->download('Data Barang ' . date('Y-m-d H:i:s') . '.pdf');
     }
 }

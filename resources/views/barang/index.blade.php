@@ -5,8 +5,8 @@
         <h3 class="card-title">{{ $page->title ?? 'Daftar Barang' }}</h3>
         <div class="card-tools">
             <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-sm btn-info mt-1">Import Barang</button>
-            <a class="btn btn-sm btn-primary mt-1" href="{{ url('level/export_excel') }}">Export</a>
-            <a href="{{ url('/barang/export_pdf') }}" class="btn btn-warning">Export Barang (PDF)</a>
+            <a class="btn btn-sm btn-primary mt-1" href="{{ url('barang/export_excel') }}">Export</a>
+            <a href="{{ url('/barang/export_pdf') }}" class="btn btn-sm btn-warning">Export Barang (PDF)</a>
             <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
@@ -43,10 +43,11 @@
                 <tr>
                     <th>No</th>
                     <th>Kode Barang</th>
+                    <th>Kategori</th>
                     <th>Nama Barang</th>
                     <th>Harga Beli</th>
                     <th>Harga Jual</th>
-                    <th>Kategori</th>
+                    <th>Stok</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -91,6 +92,12 @@
                     searchable: true
                 },
                 {
+                    data: "kategori_id",
+                    className: "",
+                    orderable: true,
+                    searchable: false
+                },
+                {
                     data: "barang_nama",
                     className: "",
                     orderable: true,
@@ -115,10 +122,13 @@
                     }
                 },
                 {
-                    data: "kategori_id",
+                    data: "stok",
                     className: "",
                     orderable: true,
-                    searchable: false
+                    searchable: false,
+                    render: function(data) {
+                        return new Intl.NumberFormat('id-ID').format(data);
+                    }
                 },
                 {
                     data: "aksi",
