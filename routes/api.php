@@ -31,4 +31,8 @@ Route::delete('levels/{level}', [App\Http\Controllers\Api\LevelController::class
 
 Route::post('/register1', App\Http\Controllers\Api\RegisterController::class)->name('register1');
 
-Route::post('barangs1', [App\Http\Controllers\Api\BarangController::class, 'store']);
+Route::get('barangs', [App\Http\Controllers\Api\BarangController::class, 'index']);
+Route::post('barangs', [App\Http\Controllers\Api\BarangController::class, 'store']);
+Route::get('barangs/{barang}', [App\Http\Controllers\Api\BarangController::class, 'show']);
+Route::put('barangs/{barang}', [App\Http\Controllers\Api\BarangController::class, 'update']);
+Route::delete('barangs/{barang}', [App\Http\Controllers\Api\BarangController::class, 'destroy']);
